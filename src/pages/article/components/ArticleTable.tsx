@@ -1,79 +1,136 @@
 import React, { Fragment, PureComponent } from 'react';
-import { Table } from 'antd';
-import styles from './index.less';
+import { Table, Tag, Dropdown, Menu, Typography, Button } from 'antd';
+import styles from './ArticleTable.less';
+import { EllipsisOutlined } from '@ant-design/icons';
+import moment from 'moment';
+import HeroImage from '@/components/HeroImage/HeroImage';
+import { NavLink } from 'umi';
+const { Paragraph } = Typography;
 
 interface ArticleTableType {
-  dataSource: [];
+    dataSource: [];
 }
 class ArticleTable extends PureComponent {
-  tabOnChange() {}
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const { article, actionMenu, key } = this.props;
+        console.log(article);
+        const tableActionMenu = record => (
+            <Menu>
+                {actionMenu.map((menu: object, index: number) => (
+                    <Menu.Item
+                        key={index}
+                        icon={menu.icon}
+                        onClick={() => menu.callback(record, menu?.action)}
+                    >
+                        {menu.name}
+                    </Menu.Item>
+                ))}
+            </Menu>
+        );
+        const columns = [
+            {
+                title: '序号',
+                dataIndex: 'index',
+                width: '60px',
+                render: (row: any, record: object) => (
+                    <Fragment>{record.index}</Fragment>
+                ),
+            },
+            {
+                title: '名称',
+                dataIndex: 'title',
+                render: (row: any, record: object) => (
+                    <Fragment>
+                        <NavLink to="#" className={styles.articleTitleWrap}>
+                            <HeroImage src={record.heroImage} />
+                            <Paragraph
+                                ellipsis={2}
+                                className={styles.articleTitle}
+                            >
+                                {record.title}
+                            </Paragraph>
+                        </NavLink>
+                    </Fragment>
+                ),
+            },
+            {
+                title: '分类',
+                dataIndex: 'category',
+                width: '80px',
+                render: (row: any, record: object) => (
+                    <Fragment>{record.category}</Fragment>
+                ),
+            },
+            {
+                title: '标签',
+                dataIndex: 'label',
+                width: '150px',
+                render: (row: any) => (
+                    <>
+                        {row.map((tag: string) => {
+                            return (
+                                <Tag key={tag} color="blue">
+                                    {tag}
+                                </Tag>
+                            );
+                        })}
+                    </>
+                ),
+            },
+            {
+                title: '类型',
+                dataIndex: 'type',
+                width: '80px',
+                render: (type: any) => (
+                    <Fragment>{type == 1 ? '转载' : '原创'}</Fragment>
+                ),
+            },
+            {
+                title: '创建时间',
+                dataIndex: 'createTime',
+                width: '150px',
+                render: (createTime: any) => (
+                    <Fragment>
+                        {moment(createTime).format('YYYY-MM-DD hh:mm:ss')}
+                    </Fragment>
+                ),
+            },
+            {
+                title: '修改时间',
+                dataIndex: 'updateTime',
+                width: '150px',
+                render: (row: any, record: object) => (
+                    <Fragment>{record.updateTime || '-'}</Fragment>
+                ),
+            },
+            {
+                title: '操作',
+                dataIndex: '',
+                width: '100px',
+                render: (row: any, record: object) => (
+                    <Fragment>
+                        <Dropdown overlay={() => tableActionMenu(record)} arrow>
+                            <Button>
+                                <EllipsisOutlined />
+                            </Button>
+                        </Dropdown>
+                    </Fragment>
+                ),
+            },
+        ];
 
-  render() {
-    const { dataSource } = this.props;
-    console.log(dataSource);
-    const publishTable = () => {
-      return <></>;
-    };
-    const columns = [
-      {
-        title: '序号',
-        dataIndex: 'index',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '名称',
-        dataIndex: 'title',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '分类',
-        dataIndex: 'category',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '标签',
-        dataIndex: 'label',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '类型',
-        dataIndex: 'type',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'createTime',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '修改时间',
-        dataIndex: 'createTime',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-      {
-        title: '操作',
-        dataIndex: '',
-        key: 'name',
-        render: (text: any) => <a>{text}</a>,
-      },
-    ];
-
-    return (
-      <Fragment>
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          pagination={{ position: ['bottomRight'] }}
-        />
-      </Fragment>
-    );
-  }
+        return (
+            <Fragment>
+                <Table
+                    className={styles.table}
+                    columns={columns}
+                    dataSource={article}
+                />
+            </Fragment>
+        );
+    }
 }
 export default ArticleTable;

@@ -1,0 +1,31 @@
+@import '~@/themes/vars.less';
+
+.articleTitleWrap {
+    .justify();
+    justify-content: flex-start;
+    .articleTitle {
+        color: #333;
+        padding-left: 10px;
+        margin: 0;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.table {
+    :global {
+        .mc-btn {
+            border: none;
+            background-color: transparent;
+            box-shadow: none;
+            font-size: 15px;
+            line-height: 1;
+            height: auto;
+
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
+}

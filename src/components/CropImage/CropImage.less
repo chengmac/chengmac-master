@@ -1,0 +1,35 @@
+@import '~@/themes/vars.less';
+
+.uploadDescript {
+    line-height: 40px;
+}
+.col {
+    padding: 15px;
+    :global {
+        .mc-upload.mc-upload-drag {
+            width: 100%;
+        }
+        .mc-upload.mc-upload-drag:not(.mc-upload-disabled):hover {
+            border-color: #d9d9d9;
+        }
+    }
+}
+
+.reactCropRow {
+    margin: 15px;
+    padding: 15px;
+    height: 450px;
+    border: 1px solid #d9d9d9;
+
+    .reactCropCol {
+        .justify();
+    }
+
+    .reactCropSave {
+        .justify();
+        justify-content: flex-end;
+        align-items: flex-end;
+    }
+}
+.dragger {
+}

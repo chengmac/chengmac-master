@@ -1,12 +1,38 @@
-.editorContainer {
-  padding: 15px 0px 0px;
-  display: flex;
-  justify-content: space-between;
-  .editors {
-    width: 70%;
-  }
+@import '~@/themes/vars.less';
 
-  .basicInfo {
-    width: 29%;
-  }
+.editorContainer {
+    padding: 15px 0px 0px;
+
+    .editorDiv {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .editors {
+        width: 70%;
+    }
+
+    .basicInfo {
+        width: 29%;
+    }
+    .heroImage {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+    }
+    .uploader {
+        width: 650px;
+        height: 415px;
+        border: 1px solid #dedede;
+        background-color: #fafafa;
+        cursor: pointer;
+        .justify();
+        .uploadWarp {
+            .justify();
+            flex-direction: column;
+        }
+        .updateIcon {
+            font-size: 20px;
+        }
+    }
 }

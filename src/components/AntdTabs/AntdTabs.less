@@ -1,0 +1,47 @@
+@import '~@/themes/vars.less';
+
+.antdTabs {
+    :global {
+        .mc-tabs {
+            .mc-tabs-left {
+                min-height: calc(100% - 30px);
+                border: 1px solid rgba(0, 0, 0, 0.095);
+
+                .mc-tabs-nav {
+                    background-color: rgba(0, 0, 0, 0.035);
+                    min-width: 100px;
+
+                    .mc-tabs-tab {
+                        padding: 10px 15px;
+                        margin: 0px;
+                    }
+
+                    .mc-tabs-tab-active {
+                        background-color: #fff;
+                    }
+                }
+
+                .mc-tabs-content-holder
+                    > .mc-tabs-content
+                    > .mc-tabs-tabpane.mc-tabs-tabpane-active {
+                    padding: 10px;
+                }
+            }
+
+            .mc-tabs-tab {
+                padding: 10px 20px !important;
+                margin: 0;
+            }
+            .mc-tabs-tab-active {
+                background-color: #fff;
+            }
+            .mc-tabs-nav-wrap {
+                background-color: #efefef;
+            }
+        }
+    }
+}
+
+.addTabBorder {
+    border: 1px solid #dedede;
+}
