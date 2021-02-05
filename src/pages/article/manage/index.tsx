@@ -37,7 +37,7 @@ class ManageArticle extends PureComponent {
             .dispatch({
                 type: 'article/updateArticleStatus',
                 payload: {
-                    articleId: article?._id,
+                    articleId: article?.articleId,
                     status: key,
                 },
             })
@@ -56,7 +56,7 @@ class ManageArticle extends PureComponent {
             .dispatch({
                 type: 'article/deleteArticle',
                 payload: {
-                    articleId: id,
+                    articleId: article.articleId,
                 },
             })
             .then(resp => {
@@ -75,11 +75,16 @@ class ManageArticle extends PureComponent {
                 articleObject: article,
             },
         });
+        this.props.dispatch({
+            type: 'app/updateCurrentMenu',
+            payload: {
+                currentMenu: '/editor',
+            },
+        });
     }
 
     render() {
-        const { article } = this.props;
-
+        const { article, loading } = this.props;
         const tabPane = [
             {
                 name: '已发布',
@@ -88,10 +93,11 @@ class ManageArticle extends PureComponent {
                     <ArticleTable
                         article={article.articleList}
                         key={'PUB'}
+                        loading={loading.effects['article/getAllArticle']}
                         actionMenu={[
                             {
                                 name: '编辑',
-                                callback: this.goToEditor,
+                                callback: this.goToEditor.bind(this),
                                 icon: <EditOutlined />,
                             },
                             {
@@ -117,10 +123,11 @@ class ManageArticle extends PureComponent {
                     <ArticleTable
                         key={'DEL'}
                         article={article.articleList}
+                        loading={loading.effects['article/getAllArticle']}
                         actionMenu={[
                             {
                                 name: '编辑',
-                                callback: this.goToEditor,
+                                callback: this.goToEditor.bind(this),
                                 icon: <EditOutlined />,
                             },
                             {
@@ -146,10 +153,11 @@ class ManageArticle extends PureComponent {
                     <ArticleTable
                         key={'DRA'}
                         article={article.articleList}
+                        loading={loading.effects['article/getAllArticle']}
                         actionMenu={[
                             {
                                 name: '编辑',
-                                callback: this.goToEditor,
+                                callback: this.goToEditor.bind(this),
                                 icon: <EditOutlined />,
                             },
                             {

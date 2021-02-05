@@ -115,13 +115,14 @@ figure {
     }
     .mc-modal-body {
         padding: 30px;
-        max-height: 600px;
+        min-height: 600px;
         overflow: hidden;
     }
 }
 
-.mc-btn {
-    // height: 40px;
-    // min-width: 100px;
-    // font-size: 14px;
+// clear button animation
+button[mc-click-animating-without-extra-node]:after {
+    border: 0 none;
+    opacity: 0;
+    animation: none 0 ease 0 normal;
 }

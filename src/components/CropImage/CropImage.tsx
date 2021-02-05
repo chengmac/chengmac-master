@@ -10,15 +10,26 @@ class CropImage extends PureComponent {
         super(props);
         this.state = {
             crop: {
-                unit: '%',
-                width: 80,
-                height: 60,
+                width: 0,
+                height: 0,
                 aspect: 16 / 9,
             },
             imageUrl: '',
             fileObject: null,
+            currentFile: null,
         };
     }
+
+    componentDidMount() {
+        const { width, height, aspect } = this.props;
+        this.setState({
+            crop: {
+                width: width,
+                height: (width * 9) / 16,
+            },
+        });
+    }
+
     componentDidUpdate(prevProps: object) {
         if (prevProps.url != this.props.url) {
             this.setState({
@@ -26,6 +37,7 @@ class CropImage extends PureComponent {
             });
         }
     }
+
     onCropComplete = (crop: any) => {
         this.makeClientCrop(crop);
     };
@@ -35,22 +47,29 @@ class CropImage extends PureComponent {
     };
 
     async makeClientCrop(crop: any) {
+        let imageName = null;
+        if (this.state.currentFile) {
+            imageName = this.state.currentFile.name;
+        } else {
+            let regx = /(?<=com\/).*?(?=\?crop)/gi;
+            let type = this.state.imageUrl.match(/(?<=&fm=).*?(?=&ixid)/gi);
+            imageName = this.state.imageUrl.match(regx) + '.' + type;
+        }
         if (this.imageRef && crop.width && crop.height) {
             const croppedImageUrl = await this.getCroppedImg(
                 this.imageRef,
                 crop,
-                'newFile.jpeg',
+                imageName,
             );
             this.setState({
                 fileObject: croppedImageUrl,
             });
         }
     }
-    onImageLoaded = image => {
+    onImageLoaded = (image: any) => {
         this.imageRef = image;
-        console.log(image);
     };
-    async getCroppedImg(image, crop, fileName) {
+    async getCroppedImg(image: any, crop: any, fileName: string) {
         const canvas = document.createElement('canvas');
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
@@ -70,14 +89,19 @@ class CropImage extends PureComponent {
             crop.height,
         );
         return new Promise((resolve, reject) => {
-            let base64 = canvas.toDataURL('image/jpeg');
-            resolve(base64);
+            canvas.toBlob(
+                (blob: any) => {
+                    blob.name = fileName;
+                    resolve(blob);
+                },
+                'image/jpeg',
+                1,
+            );
         });
     }
 
     beforeUpload(file: File) {
         return new Promise((resolve, reject) => {
-            console.log(file);
             const isJpgOrPng =
                 file.type === 'image/jpeg' ||
                 file.type === 'image/jpg' ||
@@ -86,20 +110,21 @@ class CropImage extends PureComponent {
                 this.props.showAlertMessage({
                     message: '当前仅支持JPG/JPEG/PNG等格式',
                 });
-                reject(false);
+                return reject(false);
             }
             const isLt4M = file.size / 1024 / 1024 < 4;
             if (!isLt4M) {
                 this.props.showAlertMessage({
                     message: '上传图片不能大于4M',
                 });
-                reject(false);
+                return reject(false);
             }
             let reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = file => {
+            reader.onload = () => {
                 this.setState({
                     imageUrl: reader.result,
+                    currentFile: file,
                 });
             };
             reject(reader);

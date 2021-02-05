@@ -36,7 +36,7 @@ const codeMessage = {
 };
 
 export const request: RequestConfig = {
-    timeout: 10000,
+    timeout: 30000,
     errorConfig: {
         adaptor: resData => {
             return {

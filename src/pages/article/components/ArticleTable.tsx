@@ -1,5 +1,5 @@
 import React, { Fragment, PureComponent } from 'react';
-import { Table, Tag, Dropdown, Menu, Typography, Button } from 'antd';
+import { Table, Tag, Dropdown, Menu, Typography, Button, Popover } from 'antd';
 import styles from './ArticleTable.less';
 import { EllipsisOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -15,8 +15,7 @@ class ArticleTable extends PureComponent {
         super(props);
     }
     render() {
-        const { article, actionMenu, key } = this.props;
-        console.log(article);
+        const { article, actionMenu, key, loading } = this.props;
         const tableActionMenu = record => (
             <Menu>
                 {actionMenu.map((menu: object, index: number) => (
@@ -94,7 +93,7 @@ class ArticleTable extends PureComponent {
                 width: '150px',
                 render: (createTime: any) => (
                     <Fragment>
-                        {moment(createTime).format('YYYY-MM-DD hh:mm:ss')}
+                        {moment(createTime).format('YYYY-MM-DD HH:mm:ss')}
                     </Fragment>
                 ),
             },
@@ -102,8 +101,12 @@ class ArticleTable extends PureComponent {
                 title: '修改时间',
                 dataIndex: 'updateTime',
                 width: '150px',
-                render: (row: any, record: object) => (
-                    <Fragment>{record.updateTime || '-'}</Fragment>
+                render: (updateTime: any) => (
+                    <Fragment>
+                        {!updateTime
+                            ? '-'
+                            : moment(updateTime).format('YYYY-MM-DD HH:mm:ss')}
+                    </Fragment>
                 ),
             },
             {
@@ -112,11 +115,15 @@ class ArticleTable extends PureComponent {
                 width: '100px',
                 render: (row: any, record: object) => (
                     <Fragment>
-                        <Dropdown overlay={() => tableActionMenu(record)} arrow>
+                        <Popover
+                            placement="bottom"
+                            title={undefined}
+                            content={tableActionMenu(record)}
+                        >
                             <Button>
                                 <EllipsisOutlined />
                             </Button>
-                        </Dropdown>
+                        </Popover>
                     </Fragment>
                 ),
             },
@@ -128,6 +135,7 @@ class ArticleTable extends PureComponent {
                     className={styles.table}
                     columns={columns}
                     dataSource={article}
+                    loading={loading}
                 />
             </Fragment>
         );

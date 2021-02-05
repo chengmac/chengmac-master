@@ -7,6 +7,7 @@ import AntdTabs from '@/components/AntdTabs/AntdTabs';
 import AntdAlert from '@/components/AntdAlert/AntdAlert';
 import InfiniteScroll from 'react-infinite-scroller';
 import _ from 'lodash';
+import { UPLOAD_ACTION_TYPE } from '@/uilts/constant';
 
 class ImageUploadModal extends PureComponent {
     constructor(props: object) {
@@ -88,22 +89,38 @@ class ImageUploadModal extends PureComponent {
         });
     }
 
-    saveHandle(file: string) {
-        if (file) {
-            this.props.dispatch({
-                type: 'article/uploadImage',
-                payload: {
-                    base64: file,
-                },
-            });
-            // close modal
-            this.props.onCancel();
+    saveHandle(blob: File) {
+        let formData = new FormData();
+        if (blob.name) {
+            formData.append('file', blob, blob.name);
+        } else {
+            formData.append('file', blob);
+        }
+        if (blob) {
+            this.props
+                .dispatch({
+                    type: 'article/uploadImage',
+                    payload: {
+                        formData: formData,
+                        action: UPLOAD_ACTION_TYPE.HEROIMAGE,
+                    },
+                })
+                .then(
+                    (resp: object) => {
+                        if (resp.success) {
+                            // close modal
+                            this.props.onCancel();
+                        }
+                    },
+                    (error: object) => {
+                        this.props.onCancel();
+                    },
+                );
         }
     }
     render() {
         const { title, visible, dispatch, loading, heroImage } = this.props;
         const { imageUrl, tabkey } = this.state;
-        console.log(this.state.imageList, imageUrl);
         return (
             <Fragment>
                 <Modal
@@ -137,6 +154,9 @@ class ImageUploadModal extends PureComponent {
                                 saveHandle={this.saveHandle.bind(this)}
                                 dispatch={dispatch}
                                 loading={loading}
+                                width={650}
+                                height={415}
+                                aspect={16 / 9}
                             />
                         </Tabs.TabPane>
                         <Tabs.TabPane tab="unsplash上传" key="2">
@@ -186,41 +206,41 @@ class ImageUploadModal extends PureComponent {
                                                     style={{ padding: 10 }}
                                                     key={index}
                                                 >
-                                                    {this.state
-                                                        .searchLoading ? (
-                                                        <Skeleton.Input
-                                                            active={true}
-                                                            style={{
-                                                                width: '100%',
-                                                                height: 160,
-                                                            }}
-                                                            loading={
-                                                                this.state
-                                                                    .searchLoading
-                                                            }
-                                                        />
-                                                    ) : (
-                                                        <figure
-                                                            className={
-                                                                styles.imageCardView
-                                                            }
-                                                        >
-                                                            <img
-                                                                src={
-                                                                    image.urls
-                                                                        .regular
-                                                                }
-                                                                onClick={() =>
-                                                                    this.selectedImage(
-                                                                        index,
-                                                                    )
-                                                                }
-                                                                className={
-                                                                    styles.imageCard
-                                                                }
+                                                    <Card hoverable>
+                                                        {this.state
+                                                            .searchLoading ? (
+                                                            <Skeleton.Input
+                                                                active={true}
+                                                                style={{
+                                                                    width:
+                                                                        '100%',
+                                                                    height: 160,
+                                                                }}
                                                             />
-                                                        </figure>
-                                                    )}
+                                                        ) : (
+                                                            <figure
+                                                                className={
+                                                                    styles.imageCardView
+                                                                }
+                                                            >
+                                                                <img
+                                                                    src={
+                                                                        image
+                                                                            .urls
+                                                                            .regular
+                                                                    }
+                                                                    onClick={() =>
+                                                                        this.selectedImage(
+                                                                            index,
+                                                                        )
+                                                                    }
+                                                                    className={
+                                                                        styles.imageCard
+                                                                    }
+                                                                />
+                                                            </figure>
+                                                        )}
+                                                    </Card>
                                                 </Col>
                                             ),
                                         )}

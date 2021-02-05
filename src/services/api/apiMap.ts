@@ -9,6 +9,7 @@ export default {
     deleteLabel: 'POST /article/deleteLabel',
     deleteArticle: 'POST /article/deleteArticle',
     updateArticleStatus: 'POST /article/updateArticleStatus',
+    updateArticle: 'POST /article/updateArticle',
     // upload
     uploadImage: 'POST /upload/image',
 };

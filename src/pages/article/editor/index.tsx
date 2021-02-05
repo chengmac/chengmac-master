@@ -13,80 +13,79 @@ import {
     Col,
 } from 'antd';
 import styles from './index.less';
-import BraftEditor from 'braft-editor';
-import 'braft-editor/dist/index.css';
 import CreateLabel from '../components/CreateLabel';
 import CreateCategory from '../components/CreateCategory';
 import { connect } from 'umi';
 import { ArticleModelState } from '../models/articleModel';
 import { UploadOutlined } from '@ant-design/icons';
 import ImageUploadModal from '../components/ImageUploadModal/ImageUploadModal';
+import BraftEditor from '@/components/BraftEditor/BraftEditor';
 import _ from 'lodash';
-import CodeHighlighter from 'braft-extensions/dist/code-highlighter';
-
-BraftEditor.use(
-    CodeHighlighter({
-        includeEditors: ['editor-with-code-highlighter'],
-    }),
-);
+import { history } from 'umi';
 
 class EditorArticle extends PureComponent {
     state = {
         editorState: null,
         visibleModal: false,
     };
-    componentDidUpdate(preProps: object, preState) {
-        console.log('componentDidUpdate', preProps, this.state.editorState);
-        if (
-            preProps.article?.categoryList.length !==
-            this.props.article?.categoryList.length
-        ) {
-            this.setState({
-                editorState: BraftEditor.createEditorState(
-                    this.props.location.state?.articleObject?.content,
-                ),
-            });
-        }
-    }
 
     handleEditorChange(editorState: any) {
         console.log(editorState);
         this.setState({ editorState });
     }
-    submitContent = async () => {
-        const htmlContent = this.state.editorState.toHTML();
-    };
+    submitContent = editorContent => {};
     onPublish(values: object) {
-        console.log(values);
+        const { location } = this.props;
         if (this.state.editorState == null) {
             message.error('请输入文章内容');
             return false;
         }
         let content = this.state.editorState.toHTML();
-
-        console.log('editor::::', content);
-        this.props
-            .dispatch({
-                type: 'article/saveArticle',
-                payload: {
-                    ...values,
-                    content: content,
-                    heroImage: this.props.article.heroImage,
-                    createTime: Date.now(),
-                },
-            })
-            .then(
-                (res: object) => {
-                    message.success(res.message);
-                },
-                (err: object) => {
-                    message.error(err.message);
-                },
-            );
+        if (_.isEmpty(this.props.location.state)) {
+            console.log('editor::::', content);
+            this.props
+                .dispatch({
+                    type: 'article/saveArticle',
+                    payload: {
+                        ...values,
+                        content: content,
+                        heroImage: this.props.article.heroImage,
+                        createTime: Date.now(),
+                    },
+                })
+                .then(
+                    (res: object) => {
+                        message.success(res.message);
+                        history.push('/article/manage');
+                    },
+                    (err: object) => {
+                        message.error(err.message);
+                    },
+                );
+        } else {
+            this.props
+                .dispatch({
+                    type: 'article/updateArticle',
+                    payload: {
+                        ...values,
+                        content: content,
+                        heroImage: this.props.article.heroImage,
+                        articleId: location.state?.articleObject?.articleId,
+                    },
+                })
+                .then(
+                    (res: object) => {
+                        message.success(res.message);
+                        history.push('/article/manage');
+                    },
+                    (err: object) => {
+                        message.error(err.message);
+                    },
+                );
+        }
     }
 
     createCategory(category: string) {
-        console.log(category);
         this.props
             .dispatch({
                 type: 'article/createCategory',
@@ -142,13 +141,28 @@ class EditorArticle extends PureComponent {
                 <Fragment>
                     <Form name="basic" onFinish={this.onPublish.bind(this)}>
                         <Form.Item
-                            label="文章名称"
+                            label="文章标题"
                             name="title"
                             rules={[
-                                { required: true, message: '请输入文章名称!' },
+                                { required: true, message: '请输入文章标题!' },
                             ]}
                             initialValue={
                                 location.state?.articleObject?.title || ''
+                            }
+                        >
+                            <Input placeholder="请输入" />
+                        </Form.Item>
+                        <Form.Item
+                            label="文章子标题"
+                            name="subtitle"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请输入文章子标题!',
+                                },
+                            ]}
+                            initialValue={
+                                location.state?.articleObject?.subtitle || ''
                             }
                         >
                             <Input placeholder="请输入" />
@@ -160,7 +174,8 @@ class EditorArticle extends PureComponent {
                                 { required: true, message: '请选择文章分类!' },
                             ]}
                             initialValue={
-                                location.state?.articleObject?.category || ''
+                                location.state?.articleObject?.category ||
+                                undefined
                             }
                         >
                             <Select placeholder="请选择">
@@ -183,7 +198,8 @@ class EditorArticle extends PureComponent {
                                 { required: true, message: '请选择文章标签!' },
                             ]}
                             initialValue={
-                                location.state?.articleObject?.label || ''
+                                location.state?.articleObject?.label ||
+                                undefined
                             }
                         >
                             <Select
@@ -207,7 +223,7 @@ class EditorArticle extends PureComponent {
                             name="type"
                             required={true}
                             initialValue={
-                                location.state?.articleObject?.type || '1'
+                                location.state?.articleObject?.type || '0'
                             }
                         >
                             <Radio.Group name="radiogroup">
@@ -243,14 +259,29 @@ class EditorArticle extends PureComponent {
                             />
                         </Form.Item>
                         <Form.Item>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={loading.effects['article/saveArticle']}
-                                style={{ width: '80px' }}
-                            >
-                                立即发布
-                            </Button>
+                            {_.isEmpty(location.state) ? (
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={
+                                        loading.effects['article/saveArticle']
+                                    }
+                                    style={{ width: '80px' }}
+                                >
+                                    立即发布
+                                </Button>
+                            ) : (
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={
+                                        loading.effects['article/updateArticle']
+                                    }
+                                    style={{ width: '80px' }}
+                                >
+                                    修改并发布
+                                </Button>
+                            )}
                         </Form.Item>
                     </Form>
                 </Fragment>
@@ -296,11 +327,12 @@ class EditorArticle extends PureComponent {
                         <div className={styles.editors}>
                             <Card title="文章内容">
                                 <BraftEditor
-                                    value={this.state.editorState}
+                                    location={location}
                                     onChange={this.handleEditorChange.bind(
                                         this,
                                     )}
                                     onSave={this.submitContent.bind(this)}
+                                    dispatch={dispatch}
                                 />
                             </Card>
                         </div>

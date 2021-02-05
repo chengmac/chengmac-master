@@ -1,11 +1,12 @@
 import { Effect, ImmerReducer, Subscription, history } from 'umi';
 import Api from '@/services/api';
 import _ from 'lodash';
+import { matchPathRegexp } from '@/uilts';
+import { UPLOAD_ACTION_TYPE } from '@/uilts/constant';
 
 const {
     articleSave,
     getAllArticle,
-    getQiNiuToken,
     createCategory,
     createLabel,
     categoryList,
@@ -14,6 +15,7 @@ const {
     deleteArticle,
     uploadImage,
     updateArticleStatus,
+    updateArticle,
 } = Api;
 
 export interface ArticleModelState {
@@ -30,7 +32,6 @@ interface ArticleModelType {
     effects: {
         saveArticle: Effect;
         getAllArticle: Effect;
-        getQiNiuToken: Effect;
         createCategory: Effect;
         createLabel: Effect;
         categoryList: Effect;
@@ -40,6 +41,7 @@ interface ArticleModelType {
         uploadImage: Effect;
         updateArticleStatus: Effect;
         updateHeroImage: Effect;
+        updateArticle: Effect;
     };
     reducers: {
         putGetAllArticle: ImmerReducer<ArticleModelState>;
@@ -62,7 +64,6 @@ const ArticleModel: ArticleModelType = {
     },
     effects: {
         *saveArticle({ payload }, { call, put }) {
-            console.log(payload);
             const data = yield call(articleSave, payload);
             if (data && data.success) {
                 return Promise.resolve(data);
@@ -73,7 +74,6 @@ const ArticleModel: ArticleModelType = {
             const { page, pageSize } = yield select((s: any) => s.article);
             payload.page = page;
             payload.pageSize = pageSize;
-            console.log(payload);
             const data = yield call(getAllArticle, payload);
             if (data && data.success) {
                 let list: [] = [];
@@ -86,10 +86,6 @@ const ArticleModel: ArticleModelType = {
                     payload: list,
                 });
             }
-        },
-        *getQiNiuToken({ payload }, { call }) {
-            const token = yield call(getQiNiuToken);
-            console.log(token);
         },
         *createCategory({ payload }, { call }) {
             const data = yield call(createCategory, payload);
@@ -147,12 +143,14 @@ const ArticleModel: ArticleModelType = {
             return Promise.reject(data);
         },
         *uploadImage({ payload }, { call, put }) {
-            const data = yield call(uploadImage, payload);
+            const data = yield call(uploadImage, payload.formData);
             if (data && data.success) {
-                yield put({
-                    type: 'putUploadImage',
-                    payload: data.result,
-                });
+                if (payload.action === UPLOAD_ACTION_TYPE.HEROIMAGE) {
+                    yield put({
+                        type: 'putUploadImage',
+                        payload: data.result,
+                    });
+                }
                 return Promise.resolve(data);
             }
             return Promise.reject(data);
@@ -172,6 +170,13 @@ const ArticleModel: ArticleModelType = {
                 },
             });
         },
+        *updateArticle({ payload }, { call, put }) {
+            const data = yield call(updateArticle, payload);
+            if (data && data.success) {
+                return Promise.resolve(data);
+            }
+            return Promise.reject(data);
+        },
     },
     reducers: {
         putGetAllArticle(state, { payload }) {
@@ -190,12 +195,20 @@ const ArticleModel: ArticleModelType = {
     subscriptions: {
         setup({ dispatch, history }) {
             return history.listen(location => {
-                if (location.pathname === '/article/manage') {
+                const matchManagePage = matchPathRegexp(
+                    '/article/manage',
+                    location.pathname,
+                );
+                const matchEditorPage = matchPathRegexp(
+                    '/article/editor',
+                    location.pathname,
+                );
+                if (matchManagePage) {
                     dispatch({
                         type: 'getAllArticle',
                         payload: { status: 'PUB' },
                     });
-                } else if (location.pathname === '/article/editor') {
+                } else if (matchEditorPage) {
                     dispatch({ type: 'categoryList', payload: {} });
                     dispatch({ type: 'labelList', payload: {} });
                     if (location.state?.articleObject) {
