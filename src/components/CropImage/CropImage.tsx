@@ -159,7 +159,7 @@ class CropImage extends PureComponent {
                     </Row>
                 ) : (
                     <Row className={styles.reactCropRow}>
-                        <Col span={16} className={styles.reactCropCol}>
+                        <Col span={18} className={styles.reactCropCol}>
                             <ReactCrop
                                 src={this.state.imageUrl}
                                 crop={crop}
@@ -174,7 +174,7 @@ class CropImage extends PureComponent {
                                 cropProps
                             />
                         </Col>
-                        <Col span={8} className={styles.reactCropSave}>
+                        <Col span={6} className={styles.reactCropSave}>
                             <Button
                                 type="primary"
                                 onClick={() => this.saveImage()}
