@@ -1,5 +1,5 @@
 import React, { Fragment, PureComponent } from 'react';
-import { PageHeader, Tabs } from 'antd';
+import { PageHeader, Tabs, message } from 'antd';
 import styles from './index.less';
 import ArticleTable from '../components/ArticleTable';
 import { ArticleModelState } from '../models/articleModel';
@@ -42,6 +42,7 @@ class ManageArticle extends PureComponent {
                 },
             })
             .then(resp => {
+                message.success('');
                 this.props.dispatch({
                     type: 'article/getAllArticle',
                     payload: {

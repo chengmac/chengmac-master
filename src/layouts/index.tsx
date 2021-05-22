@@ -1,8 +1,15 @@
 import React, { Children, Fragment, PureComponent } from 'react';
 import PublicLayout from './PublicLayout';
 import Cookies from 'js-cookie';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, message } from 'antd';
 
+message.config({
+    top: 100,
+    duration: 2,
+    maxCount: 3,
+    rtl: true,
+    prefixCls: 'mc-message',
+});
 class IndexLayout extends PureComponent {
     render() {
         const { children } = this.props;

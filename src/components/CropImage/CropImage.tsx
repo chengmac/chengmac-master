@@ -42,7 +42,7 @@ class CropImage extends PureComponent {
         this.makeClientCrop(crop);
     };
 
-    onCropChange = (crop: any, percentCrop) => {
+    onCropChange = (crop: any) => {
         this.setState({ crop });
     };
 
